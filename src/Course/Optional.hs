@@ -27,8 +27,9 @@ mapOptional ::
   (a -> b)
   -> Optional a
   -> Optional b
-mapOptional =
-  error "todo: Course.Optional#mapOptional"
+mapOptional _ Empty = Empty
+mapOptional f (Full a) = Full $ f a
+x = P.fmap . P.fmap  
 
 -- | Bind the given function on the possible value.
 --
@@ -45,7 +46,7 @@ bindOptional ::
   -> Optional a
   -> Optional b
 bindOptional =
-  error "todo: Course.Optional#bindOptional"
+  
 
 -- | Return the possible value if it exists; otherwise, the second argument.
 --
