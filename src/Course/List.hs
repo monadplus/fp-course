@@ -21,8 +21,8 @@ import qualified System.Environment as E
 import qualified Prelude as P
 import qualified Numeric as N
 
-
 -- $setup
+
 -- >>> import Test.QuickCheck
 -- >>> import Course.Core(even, id, const)
 -- >>> import qualified Prelude as P(fmap, foldr)
@@ -75,9 +75,9 @@ headOr ::
   a
   -> List a
   -> a
-headOr =
-  error "todo: Course.List#headOr"
-
+headOr a Nil = a
+headOr _ (h :. _) = h
+  
 -- | The product of the elements of a list.
 --
 -- >>> product Nil
@@ -91,8 +91,7 @@ headOr =
 product ::
   List Int
   -> Int
-product =
-  error "todo: Course.List#product"
+product = foldRight (*) 1
 
 -- | Sum the elements of the list.
 --
@@ -107,7 +106,7 @@ sum ::
   List Int
   -> Int
 sum =
-  error "todo: Course.List#sum"
+  foldLeft (+) 0 
 
 -- | Return the length of the list.
 --
@@ -118,8 +117,7 @@ sum =
 length ::
   List a
   -> Int
-length =
-  error "todo: Course.List#length"
+length xs = sum $ map (const 1) xs-- foldRight (\_ b -> b + 1) 0
 
 -- | Map the given function on each element of the list.
 --
@@ -133,8 +131,9 @@ map ::
   (a -> b)
   -> List a
   -> List b
-map =
-  error "todo: Course.List#map"
+map _ Nil = Nil
+map f (x :. xs) = f x :. map f xs 
+  
 
 -- | Return elements satisfying the given predicate.
 --
@@ -150,8 +149,9 @@ filter ::
   (a -> Bool)
   -> List a
   -> List a
-filter =
-  error "todo: Course.List#filter"
+filter _ Nil = Nil 
+filter pred (x :. xs) | pred x    = x :. filter pred xs
+                      | otherwise = filter pred xs
 
 -- | Append two lists to a new list.
 --
@@ -169,8 +169,8 @@ filter =
   List a
   -> List a
   -> List a
-(++) =
-  error "todo: Course.List#(++)"
+(++) Nil xs = xs
+(++) (x :. xs) ys = x :. (xs ++ ys)
 
 infixr 5 ++
 
@@ -188,8 +188,8 @@ flatten ::
   List (List a)
   -> List a
 flatten =
-  error "todo: Course.List#flatten"
-
+  foldLeft (++) Nil
+  
 -- | Map a function then flatten to a list.
 --
 -- >>> flatMap (\x -> x :. x + 1 :. x + 2 :. Nil) (1 :. 2 :. 3 :. Nil)
@@ -204,8 +204,8 @@ flatMap ::
   (a -> List b)
   -> List a
   -> List b
-flatMap =
-  error "todo: Course.List#flatMap"
+flatMap _ Nil = Nil
+flatMap f (x :. xs) = f x ++ flatMap f xs
 
 -- | Flatten a list of lists to a list (again).
 -- HOWEVER, this time use the /flatMap/ function that you just wrote.
@@ -214,8 +214,7 @@ flatMap =
 flattenAgain ::
   List (List a)
   -> List a
-flattenAgain =
-  error "todo: Course.List#flattenAgain"
+flattenAgain = flatMap id
 
 -- | Convert a list of optional values to an optional list of values.
 --
@@ -242,9 +241,15 @@ flattenAgain =
 seqOptional ::
   List (Optional a)
   -> Optional (List a)
-seqOptional =
-  error "todo: Course.List#seqOptional"
+seqOptional (x :. xs) = case x of
+  Full a -> mapOptional (\as -> a :. as) $ seqOptional xs
+  Empty  -> Empty
+seqOptional Nil = Full Nil
 
+head :: List a
+  -> Optional a
+head Nil = Empty  
+head (x :. _) = Full x  
 -- | Find the first element in the list matching the predicate.
 --
 -- >>> find even (1 :. 3 :. 5 :. Nil)
@@ -265,44 +270,47 @@ find ::
   (a -> Bool)
   -> List a
   -> Optional a
-find =
-  error "todo: Course.List#find"
+find  =
+  (head .) . filter
 
 -- | Determine if the length of the given list is greater than 4.
---
 -- >>> lengthGT4 (1 :. 3 :. 5 :. Nil)
--- False
 --
 -- >>> lengthGT4 Nil
 -- False
 --
--- >>> lengthGT4 (1 :. 2 :. 3 :. 4 :. 5 :. Nil)
--- True
+-- >>> lengthGT4 (1 :. 2 :. 3 :. 4 :. Nil)
 --
 -- >>> lengthGT4 infinity
 -- True
 lengthGT4 ::
   List a
   -> Bool
-lengthGT4 =
-  error "todo: Course.List#lengthGT4"
-
+lengthGT4 = (> 4) . length . take 5 
 -- | Reverse a list.
 --
 -- >>> reverse Nil
+-- <interactive>:18:2: warning: [-Wtype-defaults]
+--     • Defaulting the following constraint to type ‘()’
+--         Show a0 arising from a use of ‘P.print’
+--     • In a stmt of an interactive GHCi command: P.print it
 -- []
 --
 -- >>> take 1 (reverse (reverse largeList))
 -- [1]
 --
--- prop> \x -> let types = x :: List Int in reverse x ++ reverse y == reverse (y ++ x)
+-- >>> reverse (1 :. 2 :. 3 :. 4 :. 5 :. Nil)
+-- []
 --
 -- prop> \x -> let types = x :: Int in reverse (x :. Nil) == x :. Nil
 reverse ::
   List a
   -> List a
-reverse =
-  error "todo: Course.List#reverse"
+reverse l = rev l Nil
+  where
+    rev Nil       a = a
+    rev (x :. xs) a = rev xs (x :. a)
+
 
 -- | Produce an infinite `List` that seeds with the given value at its head,
 -- then runs the given function for subsequent elements
@@ -331,7 +339,7 @@ notReverse ::
   List a
   -> List a
 notReverse =
-  error "todo: Is it even possible?"
+  take (1::Integer)
 
 ---- End of list exercises
 
