@@ -30,7 +30,7 @@ infixl 4 <$>
 -- $setup
 -- >>> :set -XOverloadedStrings
 -- >>> import Course.Core
--- >>> import qualified Prelude as P(return, (>>))
+-- >>> import qualified Prelude as P(return, (>>), fromInteger)
 
 -- | Maps a function on the ExactlyOne functor.
 --
@@ -41,8 +41,7 @@ instance Functor ExactlyOne where
     (a -> b)
     -> ExactlyOne a
     -> ExactlyOne b
-  (<$>) =
-    error "todo: Course.Functor (<$>)#instance ExactlyOne"
+  (<$>) f (ExactlyOne a) = ExactlyOne $ f a
 
 -- | Maps a function on the List functor.
 --
@@ -56,8 +55,8 @@ instance Functor List where
     (a -> b)
     -> List a
     -> List b
-  (<$>) =
-    error "todo: Course.Functor (<$>)#instance List"
+  (<$>) _ Nil = Nil
+  (<$>) f (x :. xs) = f x :. (<$>) f xs
 
 -- | Maps a function on the Optional functor.
 --
@@ -71,20 +70,22 @@ instance Functor Optional where
     (a -> b)
     -> Optional a
     -> Optional b
-  (<$>) =
-    error "todo: Course.Functor (<$>)#instance Optional"
+  (<$>) _ Empty = Empty
+  (<$>) f (Full a) = Full $ f a
+    
 
 -- | Maps a function on the reader ((->) t) functor.
 --
 -- >>> ((+1) <$> (*2)) 8
 -- 17
+
 instance Functor ((->) t) where
   (<$>) ::
     (a -> b)
-    -> ((->) t a)
-    -> ((->) t b)
-  (<$>) =
-    error "todo: Course.Functor (<$>)#((->) t)"
+    -> (->) t a
+    -> (->) t b
+  (<$>) f fta t = f $ fta t
+    
 
 -- | Anonymous map. Maps a constant value on a functor.
 --
@@ -99,8 +100,7 @@ instance Functor ((->) t) where
   a
   -> f b
   -> f a
-(<$) =
-  error "todo: Course.Functor#(<$)"
+(<$) a = (const a <$>)
 
 -- | Anonymous map producing unit value.
 --
@@ -117,10 +117,9 @@ instance Functor ((->) t) where
 -- ()
 void ::
   Functor f =>
-  f a
-  -> f ()
-void =
-  error "todo: Course.Functor#void"
+    f a
+    -> f ()
+void = (() <$)
 
 -----------------------
 -- SUPPORT LIBRARIES --
