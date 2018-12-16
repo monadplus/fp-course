@@ -62,7 +62,7 @@ bindOptional f (Full a) = f a
 (??) Empty a = a  
 
 -- | Try the first optional for a value. If it has a value, use it; otherwise,
--- use the second value.
+-- use the second value. (Is this Alternative ?)
 --
 -- >>> Full 8 <+> Empty
 -- Full 8
