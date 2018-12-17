@@ -2,6 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RebindableSyntax #-}
+{-# LANGUAGE TupleSections #-}
 
 module Course.FileIO where
 
@@ -10,7 +11,8 @@ import Course.Applicative
 import Course.Monad
 import Course.Functor
 import Course.List
-
+import qualified Prelude as P(uncurry)
+import qualified Control.Monad as M(guard)
 {-
 
 Useful Functions --
@@ -69,7 +71,7 @@ Loading ...
 Ok, modules loaded: Course, etc...
 >> :main "share/files.txt"
 ============ share/a.txt
-the contents of a
+the contents of ac
 
 ============ share/b.txt
 the contents of b
@@ -85,24 +87,28 @@ printFile ::
   FilePath
   -> Chars
   -> IO ()
-printFile =
-  error "todo: Course.FileIO#printFile"
+  -- putStrLn ("============ " ++ path) >> putStrLn content
+printFile path content = do
+    putStrLn ("============ " ++ path)
+    traverseVoid putStrLn (lines content)
+  
 
 -- Given a list of (file name and file contents), print each.
 -- Use @printFile@.
 printFiles ::
   List (FilePath, Chars)
   -> IO ()
-printFiles =
-  error "todo: Course.FileIO#printFiles"
+printFiles l =
+  sequenceVoid $ P.uncurry printFile <$> l
+  
 
 -- Given a file name, return (file name and file contents).
 -- Use @readFile@.
 getFile ::
   FilePath
   -> IO (FilePath, Chars)
-getFile =
-  error "todo: Course.FileIO#getFile"
+getFile filename =
+  (filename,) <$> readFile filename
 
 -- Given a list of file names, return list of (file name and file contents).
 -- Use @getFile@.
@@ -110,25 +116,34 @@ getFiles ::
   List FilePath
   -> IO (List (FilePath, Chars))
 getFiles =
-  error "todo: Course.FileIO#getFiles"
+  traverseL getFile
 
 -- Given a file name, read it and for each line in that file, read and print contents of each.
 -- Use @getFiles@ and @printFiles@.
 run ::
   FilePath
   -> IO ()
-run =
-  error "todo: Course.FileIO#run"
-
+run path = do
+  content      <- readFile path
+  filesContent <- getFiles $ lines content
+  printFiles filesContent
+  
 -- /Tip:/ use @getArgs@ and @run@
 main ::
   IO ()
-main =
-  error "todo: Course.FileIO#main"
-
+main = do
+  inputs <- getArgs
+  run $ headOr (error "arg: $filename") inputs
+  
 ----
 
--- Was there was some repetition in our solution?
--- ? `sequence . (<$>)`
--- ? `void . sequence . (<$>)`
--- Factor it out.
+sequenceVoid :: Applicative f =>
+             List (f a)
+             -> f ()
+sequenceVoid = void . sequence
+
+traverseVoid :: Applicative f =>
+             (a -> f b)
+             -> List a
+             -> f ()
+traverseVoid = (void .) . traverseL

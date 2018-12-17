@@ -325,12 +325,20 @@ lift1 =
 --
 -- >>> sequence ((*10) :. (+2) :. Nil) 6
 -- [60,8]
+traverseL ::
+  Applicative f =>
+  (a -> f b)
+  -> List a
+  -> f (List b)
+traverseL _ Nil = pure Nil
+traverseL f (x :. xs) = lift2 (:.) (f x) (traverseL f xs)
+
 sequence ::
   Applicative f =>
   List (f a)
   -> f (List a)
-sequence Nil = pure Nil
-sequence (fa :. t) = lift2 (:.) fa (sequence t)
+sequence = traverseL id 
+
   
 
 -- | Replicate an effect a given number of times.
