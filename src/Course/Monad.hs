@@ -176,3 +176,14 @@ infixr 1 <=<
 instance Monad IO where
   (=<<) =
     (P.=<<)
+
+unless ::
+  Applicative f =>
+  Bool
+  -> f ()
+  -> f ()
+unless p s =
+  if p
+    then pure ()
+    else s 
+  
