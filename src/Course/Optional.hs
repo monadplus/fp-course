@@ -99,7 +99,7 @@ optional f _ (Full a) = f a
  
 
 applyOptional :: Optional (a -> b) -> Optional a -> Optional b
-applyOptional f a = bindOptional (\f' -> mapOptional f' a) f
+applyOptional f a = bindOptional (`mapOptional` a) f
 
 twiceOptional :: (a -> b -> c) -> Optional a -> Optional b -> Optional c
 twiceOptional f = applyOptional . mapOptional f
@@ -108,6 +108,13 @@ contains :: Eq a => a -> Optional a -> Bool
 contains _ Empty = False
 contains a (Full z) = a == z
 
+optionalF ::
+  (a -> Bool)
+  -> a
+  -> Optional a
+optionalF pred a =
+  if pred a then Full a else Empty
+  
 instance P.Functor Optional where
   fmap =
     M.liftM

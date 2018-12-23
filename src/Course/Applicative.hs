@@ -392,14 +392,9 @@ filtering ::
   (a -> f Bool)
   -> List a
   -> f (List a)
-filtering _ Nil = pure Nil
-filtering pred (x :. xs) = appendC <$> pred x <*> filtering pred xs
-  where
-    appendC b ys | b         = x :. ys
-                 | otherwise = ys
-
+filtering p =
+  foldRight (\a -> lift2 (\b -> if b then (a :.) else id) (p a)) (pure Nil)
   
-
 -----------------------
 -- SUPPORT LIBRARIES --
 -----------------------

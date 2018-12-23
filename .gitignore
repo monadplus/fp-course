@@ -36,3 +36,9 @@ TAGS
 # Vagrant
 .vagrant
 ops/*.retry
+
+# Build files
+/src/Course/*.o
+/src/Course/*.hi
+/test/Course/*.hi
+/test/Course/*.hi
