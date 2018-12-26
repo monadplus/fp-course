@@ -469,7 +469,7 @@ zipWith ::
   -> List c
 zipWith f (a:.as) (b:.bs) =
   f a b :. zipWith f as bs
-zipWith _ _  _ =
+zipWith _ _ _ =
   Nil
 
 unfoldr ::
