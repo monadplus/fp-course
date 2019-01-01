@@ -50,9 +50,15 @@ infinity =
   in inf 0
 
 -- functions over List that you may consider using
-foldRight :: (a -> b -> b) -> b -> List a -> b
-foldRight _ b Nil      = b
-foldRight f b (h :. t) = f h (foldRight f b t)
+foldRight ::
+  (a -> b -> b)
+  -> b
+  -> List a
+  -> b
+foldRight _ b Nil      =
+  b
+foldRight f b (h :. t) =
+  f h (foldRight f b t)
 
 foldLeft :: (b -> a -> b) -> b -> List a -> b
 foldLeft _ b Nil      = b
@@ -204,8 +210,7 @@ flatMap ::
   (a -> List b)
   -> List a
   -> List b
-flatMap _ Nil = Nil
-flatMap f (x :. xs) = f x ++ flatMap f xs
+flatMap f = flatten . map f
 
 -- | Flatten a list of lists to a list (again).
 -- HOWEVER, this time use the /flatMap/ function that you just wrote.

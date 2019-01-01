@@ -36,8 +36,15 @@ instance Traversable List where
     (a -> f b)
     -> List a
     -> f (List b)
-  traverse f =
-    foldRight (\a b -> (:.) <$> f a <*> b) (pure Nil)
+  -- {-# INLINE traverse #-}
+  -- traverse f =
+  --   foldRight (lift2 (:.) . f) (pure Nil)
+  traverse _ Nil =
+    pure Nil
+  traverse g (h:.t) =
+    let fb = g h
+        flb = traverse g t
+    in lift2 (flip (:.)) flb fb -- order matters ..
 
 instance Traversable ExactlyOne where
   traverse ::
