@@ -219,9 +219,12 @@ instance Applicative Parser where
     Parser (a -> b)
     -> Parser a
     -> Parser b
-  (<*>) pf p =
-    let f a = ($ a) <$> pf 
-    in f =<< p
+  (<*>) f p =
+    let g a = ($ a) <$> f 
+    in g =<< p
+--    let g i x = ($ x) <$> parse f i
+--        h j = onResult (p j) g
+--    in P h
 
 -- | Return a parser that produces a character but fails if
 --

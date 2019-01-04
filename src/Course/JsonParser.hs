@@ -241,13 +241,11 @@ jsonObject ::
   Parser Assoc
 jsonObject =
   let kvParser = do
-        _ <- spaces
-        k <- jsonString
-        _ <- spaces
+        k <- spaces *> jsonString <* spaces
         _ <- charTok ':'
         v <- jsonValue
         pure (k,v)
- -- let kvParser = lift2 (,) (spaces *> jsonString <* (spaces <* charTok ':')) jsonValue
+  -- let kvParser = lift2 (,) (spaces *> jsonString <* (spaces <* charTok ':')) jsonValue
   in betweenSepbyComma '{' '}' kvParser
 
 -- | Parse a JSON value.

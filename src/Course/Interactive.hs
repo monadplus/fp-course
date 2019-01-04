@@ -27,7 +27,7 @@ vooid =
   -> m b
   -> m b
 (>-) a =
-  (>>=) a . const
+  ((>>=) a) . const
 
 -- | Runs an action until a result of that action satisfies a given predicate.
 untilM ::
@@ -83,8 +83,11 @@ data Op =
 convertInteractive ::
   IO ()
 convertInteractive =
-  error "todo: Course.Interactive#convertInteractive"
-
+  putStrLn "Enter a word: " >-
+  getLine >>= \w ->
+  putStrLn (toUpper <$> w) >-
+  putStrLn ""
+  
 -- |
 --
 -- * Ask the user to enter a file name to reverse.
@@ -111,8 +114,13 @@ convertInteractive =
 reverseInteractive ::
   IO ()
 reverseInteractive =
-  error "todo: Course.Interactive#reverseInteractive"
-
+  do _ <- putStrLn "Enter an input file: "
+     input <- getLine
+     _ <- putStrLn "Enter an output file: "
+     output <- getLine
+     content <- readFile input -- all in memory ! 
+     writeFile output $ reverse content
+     putStrLn ""
 -- |
 --
 -- * Ask the user to enter a string to url-encode.
@@ -137,7 +145,19 @@ reverseInteractive =
 encodeInteractive ::
   IO ()
 encodeInteractive =
-  error "todo: Course.Interactive#encodeInteractive"
+  let encode ::
+        Chars
+        -> Chars
+      encode =
+        (=<<) (\c -> case c of
+                ' '  -> "%20"
+                '\t' -> "%09"
+                '\"' -> "%22"
+                _    -> c :. Nil)  
+  in putStrLn "Enter an url: " >-
+     getLine >>= \url ->
+     putStrLn (encode url) >-
+     putStrLn ""
 
 interactive ::
   IO ()
