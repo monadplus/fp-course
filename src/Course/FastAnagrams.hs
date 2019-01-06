@@ -14,9 +14,17 @@ fastAnagrams ::
   Chars
   -> FilePath
   -> IO (List Chars)
-fastAnagrams =
-  error "todo: Course.FastAnagrams#fastAnagrams"
+fastAnagrams w p =
+  ((flip filter) (permutations w)) . (flip S.member) . S.fromList . hlist . lines <$> readFile p
 
+
+fastAnagrams2 :: Chars -> FilePath -> IO (List Chars)
+fastAnagrams2 w p = let d = ((NoCaseString <$>) . lines) <$> readFile p
+                        a = NoCaseString <$> permutations w
+                        r = intersectBy (==) a <$> d
+                    in (ncString <$>) <$> r
+
+  
 newtype NoCaseString =
   NoCaseString {
     ncString :: Chars
